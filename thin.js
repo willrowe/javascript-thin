@@ -4,7 +4,9 @@
     var originalMethods = {
         "Element": {
             "setAttribute": window.Element.prototype.setAttribute,
-            "removeAttribute": window.Element.prototype.removeAttribute
+            "removeAttribute": window.Element.prototype.removeAttribute,
+            "addEventListener": window.Element.prototype.addEventListener,
+            "removeEventListener": window.Element.prototype.removeEventListener
         }
     };
 
@@ -65,6 +67,20 @@
         return this;
     };
 
+    // Events
+    window.Element.prototype.addEventListener = function (type, listener, useCapture) {
+        originalMethods.Element.addEventListener.call(this, type, listener, useCapture);
+
+        return this;
+    };
+
+    window.Element.prototype.removeEventListener = function (type, listener, useCapture) {
+        originalMethods.Element.removeEventListener.call(this, type, listener, useCapture);
+
+        return this;
+    };
+
+
     /**
      * NodeList
      */
@@ -112,5 +128,18 @@
         var results = callEach(this, "hasAttribute", [name]);
 
         return (results.indexOf(true) >= 0);
+    };
+
+    // Events
+    window.NodeList.prototype.addEventListener = function (type, listener, useCapture) {
+        callEach(this, "addEventListener", [type, listener, useCapture]);
+
+        return this;
+    };
+
+    window.NodeList.prototype.removeEventListener = function (type, listener, useCapture) {
+        callEach(this, "removeEventListener", [type, listener, useCapture]);
+
+        return this;
     };
 }(window, document));
