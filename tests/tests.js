@@ -19,7 +19,7 @@
 
     function cleanSandbox() {
         var sandboxNode = document.querySelector(sandboxSelector);
-        sandboxNode.parentNode.replaceChild(originalSandboxNode, sandboxNode);
+        sandboxNode.parentNode.replaceChild(originalSandboxNode.cloneNode(true), sandboxNode);
     }
 
     function generateTestEvent() {
