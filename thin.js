@@ -111,6 +111,8 @@
      */
     window.NodeList.prototype.forEach = function (callback, thisArg) {
         forEach(this, callback, thisArg);
+
+        return this;
     };
 
     // Classes

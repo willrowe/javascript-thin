@@ -159,10 +159,10 @@
         var elements = $(multipleSelector),
             index = 0;
 
-        $(multipleSelector).forEach(function (element) {
+        assert.ok($(multipleSelector).forEach(function (element) {
             assert.strictEqual(element, elements[index]);
             index += 1;
-        });
+        }) instanceof window.NodeList);
     });
 
     // Class Methods
