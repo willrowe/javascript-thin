@@ -23,19 +23,27 @@
         return returnValues;
     }
 
+    window.Thin = function (query) {
+        return document.querySelectorAll(query);
+    };
+
     /**
      * Element
      */
 
     // Classes
     window.Element.prototype.addClass = function () {
-        this.classList.add.apply(this.classList, arguments);
+        forEach(arguments, function (name) {
+            this.classList.add(name);
+        }, this);
 
         return this;
     };
 
     window.Element.prototype.removeClass = function () {
-        this.classList.remove.apply(this.classList, arguments);
+        forEach(arguments, function (name) {
+            this.classList.remove(name);
+        }, this);
 
         return this;
     };

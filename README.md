@@ -28,7 +28,12 @@ Method Reference
 ----------------
 Next to each method name it is stated whether the method was been *Added* or the existing method was *Altered*
 ###General###
-- `Thin`
+- `Thin(query)` *Added*
+    Returns any `Element` that matches the query.
+    + query
+        - `String`
+        - The query to match against.
+    * Returns `NodeList`
 
 ###Element Interface###
 - `addClass(name[, ...])` *Added*  
@@ -199,6 +204,12 @@ Next to each method name it is stated whether the method was been *Added* or the
 
 Browser Compatibility
 ---------------------
+- **Chrome**: 8.0+
+- **Firefox**: 6.0+
+- **Internet Explorer**: 10.0+
+- **Opera**: 12.00+
+- **Safari**: 5.1+
+
 
 License
 -------

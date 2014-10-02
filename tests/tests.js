@@ -44,12 +44,28 @@
         dispatchedConfirmationString = null;
     });
 
+    Q.test("Thin Shortcut Function", function (assert) {
+        var i,
+            thinList,
+            nativeList;
+
+        assert.ok(window.Thin(singleSelector) instanceof window.NodeList);
+        assert.strictEqual(window.Thin(singleSelector)[0], document.querySelectorAll(singleSelector)[0]);
+
+        thinList = window.Thin(multipleSelector);
+        nativeList = document.querySelectorAll(multipleSelector);
+        assert.ok(thinList instanceof window.NodeList);
+        for (i = 0; i < thinList.length; i += 1) {
+            assert.strictEqual(thinList[i], nativeList[i]);
+        }
+    });
+
     /**
      * Element
      */
 
     // Class Methods
-    Q.test("Add Element Class Test", function (assert) {
+    Q.test("Add Element Class", function (assert) {
         // One Class
         assert.ok($(singleSelector, false).addClass("foo") instanceof window.Element);
         assert.ok($(singleSelector, false).className.indexOf("foo") >= 0);
@@ -60,7 +76,7 @@
         assert.ok($(singleSelector, false).className.indexOf("bar") >= 0);
     });
 
-    Q.test("Remove Element Class Test", function (assert) {
+    Q.test("Remove Element Class", function (assert) {
         // One Class
         $(singleSelector, false).addClass("foo");
         assert.ok($(singleSelector, false).removeClass("foo") instanceof window.Element);
@@ -73,14 +89,14 @@
         assert.equal($(singleSelector, false).className.indexOf("bar"), -1);
     });
 
-    Q.test("Element Has Class Test", function (assert) {
+    Q.test("Element Has Class", function (assert) {
         $(singleSelector, false).addClass("foo");
         assert.ok($(singleSelector, false).hasClass("foo"));
         assert.equal($(singleSelector, false).hasClass("bar"), false);
     });
 
     // Attribute Methods
-    Q.test("Set Element Attribute Test", function (assert) {
+    Q.test("Set Element Attribute", function (assert) {
         // One Attribute
         assert.ok($(singleSelector, false).setAttribute("data-foo", "bar") instanceof window.Element);
         assert.equal($(singleSelector, false).attributes.getNamedItem("data-foo").value, "bar");
@@ -91,7 +107,7 @@
         assert.equal($(singleSelector, false).attributes.getNamedItem("data-baz").value, "qux");
     });
 
-    Q.test("Remove Element Attribute Test", function (assert) {
+    Q.test("Remove Element Attribute", function (assert) {
         // One Attribute
         $(singleSelector, false).setAttribute("data-foo", "bar");
         assert.ok($(singleSelector, false).removeAttribute("data-foo") instanceof window.Element);
@@ -105,14 +121,14 @@
     });
 
     // Event Methods
-    Q.test("Add Element Event Listener Test", function (assert) {
+    Q.test("Add Element Event Listener", function (assert) {
         var evt = generateTestEvent();
         assert.ok($(singleSelector, false).addEventListener("test", testListener) instanceof window.Element);
         assert.ok($(singleSelector, false).dispatchEvent(evt));
         assert.equal(dispatchedConfirmationString, evt.confirmationString);
     });
 
-    Q.test("Remove Element Event Listener Test", function (assert) {
+    Q.test("Remove Element Event Listener", function (assert) {
         $(singleSelector, false).addEventListener("test", testListener);
         assert.ok($(singleSelector, false).removeEventListener("test", testListener) instanceof window.Element);
         $(singleSelector, false).dispatchEvent(generateTestEvent());
@@ -120,7 +136,7 @@
     });
 
     // Property Methods
-    Q.test("Set Element Property Test", function (assert) {
+    Q.test("Set Element Property", function (assert) {
         // One Property
         assert.ok($(singleFormSelector, false).setProperty("title", "quux") instanceof window.Element);
         assert.equal($(singleFormSelector, false).title, "quux");
@@ -139,14 +155,14 @@
         assert.ok(!$(singleFormSelector, false).hasOwnProperty("baz"));
     });
 
-    Q.test("Get Element Property Test", function (assert) {
+    Q.test("Get Element Property", function (assert) {
         $(singleFormSelector, false).title = "quux";
         assert.equal($(singleFormSelector, false).getProperty("title"), "quux");
 
         assert.strictEqual($(singleFormSelector, false).getProperty("foo"), undefined);
     });
 
-    Q.test("Element Has Property Test", function (assert) {
+    Q.test("Element Has Property", function (assert) {
         assert.ok($(singleFormSelector, false).hasProperty("title"));
         assert.ok(!$(singleFormSelector, false).hasProperty("foo"));
     });
@@ -155,7 +171,7 @@
      * NodeList
      */
 
-    Q.test("NodeList forEach Test", function (assert) {
+    Q.test("NodeList forEach", function (assert) {
         var elements = $(multipleSelector),
             index = 0;
 
@@ -166,7 +182,7 @@
     });
 
     // Class Methods
-    Q.test("Add NodeList Class Test", function (assert) {
+    Q.test("Add NodeList Class", function (assert) {
         // Single Class
         assert.ok($(multipleSelector).addClass("foo") instanceof window.NodeList);
         $(multipleSelector).forEach(function (element) {
@@ -181,7 +197,7 @@
         });
     });
 
-    Q.test("Remove NodeList Class Test", function (assert) {
+    Q.test("Remove NodeList Class", function (assert) {
         $(multipleSelector).addClass("foo");
         assert.ok($(multipleSelector).removeClass("foo") instanceof window.NodeList);
         $(multipleSelector).forEach(function (element) {
@@ -196,7 +212,7 @@
         });
     });
 
-    Q.test("NodeList Has Class Test", function (assert) {
+    Q.test("NodeList Has Class", function (assert) {
         assert.equal($(multipleSelector).hasClass("foo"), false);
         $(multipleSelector)[0].addClass("foo");
         assert.ok($(multipleSelector).hasClass("foo"));
@@ -206,7 +222,7 @@
     });
 
     // Attribute Methods
-    Q.test("Set NodeList Attribute Test", function (assert) {
+    Q.test("Set NodeList Attribute", function (assert) {
         // One Attribute
         assert.ok($(multipleSelector).setAttribute("data-foo", "bar") instanceof window.NodeList);
         $(multipleSelector).forEach(function (element) {
@@ -221,7 +237,7 @@
         });
     });
 
-    Q.test("Remove NodeList Attribute Test", function (assert) {
+    Q.test("Remove NodeList Attribute", function (assert) {
         // One Attribute
         $(multipleSelector).setAttribute("data-foo", "bar");
         assert.ok($(multipleSelector).removeAttribute("data-foo", "bar") instanceof window.NodeList);
@@ -238,7 +254,7 @@
         });
     });
 
-    Q.test("NodeList Has Attribute Test", function (assert) {
+    Q.test("NodeList Has Attribute", function (assert) {
         assert.ok(!$(multipleSelector).hasAttribute("data-foo"));
         $(multipleSelector)[0].setAttribute("data-foo", "bar");
         assert.ok($(multipleSelector).hasAttribute("data-foo"));
@@ -247,13 +263,13 @@
         assert.ok(!$(multipleSelector).hasAttribute("data-baz"));
     });
 
-    Q.test("Get NodeList Attribute Test", function (assert) {
+    Q.test("Get NodeList Attribute", function (assert) {
         $(multipleSelector)[0].setAttribute("data-foo", "bar");
         assert.equal($(multipleSelector).getAttribute("data-foo"), "bar");
     });
 
     // Event Methods
-    Q.test("Add NodeList Event Listener Test", function (assert) {
+    Q.test("Add NodeList Event Listener", function (assert) {
         var evt;
         assert.ok($(multipleSelector).addEventListener("test", testListener) instanceof window.NodeList);
 
@@ -264,7 +280,7 @@
         });
     });
 
-    Q.test("Remove NodeList Event Listener Test", function (assert) {
+    Q.test("Remove NodeList Event Listener", function (assert) {
         $(multipleSelector).addEventListener("test", testListener);
         assert.ok($(multipleSelector).removeEventListener("test", testListener) instanceof window.NodeList);
 
@@ -275,7 +291,7 @@
     });
 
     // Property Methods
-    Q.test("Set NodeList Property Test", function (assert) {
+    Q.test("Set NodeList Property", function (assert) {
         // One Property
         assert.ok($(multipleFormSelector).setProperty("title", "quux") instanceof window.NodeList);
         $(multipleFormSelector).forEach(function (element) {
@@ -302,13 +318,13 @@
         });
     });
 
-    Q.test("Get NodeList Property Test", function (assert) {
+    Q.test("Get NodeList Property", function (assert) {
         $(multipleFormSelector)[0].title = "quux";
         assert.equal($(multipleFormSelector).getProperty("title"), "quux");
         assert.strictEqual($(multipleFormSelector).getProperty("foo"), undefined);
     });
 
-    Q.test("NodeList Has Property Test", function (assert) {
+    Q.test("NodeList Has Property", function (assert) {
         assert.ok($(multipleFormSelector).hasProperty("title"));
         assert.ok(!$(multipleFormSelector).hasProperty("foo"));
     });
