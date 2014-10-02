@@ -146,6 +146,10 @@
         assert.strictEqual($(singleFormSelector, false).getProperty("foo"), undefined);
     });
 
+    Q.test("Element Has Property Test", function (assert) {
+        assert.ok($(singleFormSelector, false).hasProperty("title"));
+        assert.ok(!$(singleFormSelector, false).hasProperty("foo"));
+    });
 
     /**
      * NodeList

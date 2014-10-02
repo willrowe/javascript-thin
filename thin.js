@@ -76,7 +76,7 @@
         }
 
         for (name in properties) {
-            if (this.hasOwnProperty(name)) {
+            if (this.hasProperty(name)) {
                 this[name] = properties[name];
             }
         }
@@ -85,11 +85,11 @@
     };
 
     window.Element.prototype.getProperty = function (name) {
-        if (!this.hasOwnProperty(name)) {
-            return undefined;
-        }
-
         return this[name];
+    };
+
+    window.Element.prototype.hasProperty = function (name) {
+        return (name in this);
     };
 
     // Events
@@ -167,7 +167,7 @@
     };
 
     window.NodeList.prototype.hasProperty = function (name) {
-        var results = callEach(this, "hasOwnProperty", [name]);
+        var results = callEach(this, "hasProperty", [name]);
 
         return (results.indexOf(true) >= 0);
     };
