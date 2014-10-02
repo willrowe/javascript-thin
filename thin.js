@@ -67,6 +67,31 @@
         return this;
     };
 
+    // Properties
+    window.Element.prototype.setProperty = function (name, value) {
+        var properties = name;
+        if (typeof properties === "string") {
+            properties = {};
+            properties[name] = value;
+        }
+
+        for (name in properties) {
+            if (this.hasOwnProperty(name)) {
+                this[name] = properties[name];
+            }
+        }
+
+        return this;
+    };
+
+    window.Element.prototype.getProperty = function (name) {
+        if (!this.hasOwnProperty(name)) {
+            return undefined;
+        }
+
+        return this[name];
+    };
+
     // Events
     window.Element.prototype.addEventListener = function (type, listener, useCapture) {
         originalMethods.Element.addEventListener.call(this, type, listener, useCapture);
@@ -126,6 +151,23 @@
 
     window.NodeList.prototype.hasAttribute = function (name) {
         var results = callEach(this, "hasAttribute", [name]);
+
+        return (results.indexOf(true) >= 0);
+    };
+
+    // Properties
+    window.NodeList.prototype.setProperty = function (name, value) {
+        callEach(this, "setProperty", [name, value]);
+
+        return this;
+    };
+
+    window.NodeList.prototype.getProperty = function (name) {
+        return this[0].getProperty(name);
+    };
+
+    window.NodeList.prototype.hasProperty = function (name) {
+        var results = callEach(this, "hasOwnProperty", [name]);
 
         return (results.indexOf(true) >= 0);
     };
