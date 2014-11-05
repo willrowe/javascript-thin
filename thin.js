@@ -1,14 +1,35 @@
 (function (window, document) {
     "use strict";
 
-    var originalMethods = {
-        "Element": {
-            "setAttribute": window.Element.prototype.setAttribute,
-            "removeAttribute": window.Element.prototype.removeAttribute,
-            "addEventListener": window.Element.prototype.addEventListener,
-            "removeEventListener": window.Element.prototype.removeEventListener
+    function bindLoad(listener, waitForAll) {
+        if (waitForAll === true) {
+            window.addEventListener("load", listener);
         }
-    };
+        document.addEventListener("DOMContentLoaded", listener);
+    }
+
+    var originalMethods = {
+            "Element": {
+                "setAttribute": window.Element.prototype.setAttribute,
+                "removeAttribute": window.Element.prototype.removeAttribute,
+                "addEventListener": window.Element.prototype.addEventListener,
+                "removeEventListener": window.Element.prototype.removeEventListener
+            }
+        },
+        thinFunctionSignatures = {
+            "string": {
+                thisArg: document,
+                callback: document.querySelectorAll
+            },
+            "function": {
+                thisArg: this,
+                callback: bindLoad
+            },
+            "function, boolean": {
+                thisArg: this,
+                callback: bindLoad
+            }
+        };
 
     function forEach(object, callback, thisArg) {
         window.Array.prototype.forEach.call(object, callback, thisArg);
@@ -23,8 +44,19 @@
         return returnValues;
     }
 
-    window.Thin = function (query) {
-        return document.querySelectorAll(query);
+    function getTypeStrings(args) {
+        var typeStrings = [];
+        forEach(args, function (variable) {
+            typeStrings.push(typeof variable !== "object" ? typeof variable : variable.toString());
+        });
+
+        return typeStrings;
+    }
+
+    window.Thin = function () {
+        var signature = thinFunctionSignatures[getTypeStrings(arguments).join(", ")];
+
+        return signature.callback.apply(signature.thisArg, arguments);
     };
 
     /**

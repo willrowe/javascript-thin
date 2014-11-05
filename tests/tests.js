@@ -7,7 +7,25 @@
         multipleFormSelector = "form input[type=checkbox]",
         sandboxSelector = "#sandbox",
         originalSandboxNode,
-        dispatchedConfirmationString;
+        dispatchedConfirmationString,
+        DOMContentLoadedTestResult,
+        WindowLoadedTestResult;
+
+    window.Thin(function (evt) {
+        DOMContentLoadedTestResult = {
+            thisObj: this,
+            state: document.readyState,
+            eventObj: evt
+        };
+    });
+
+    window.Thin(function (evt) {
+        WindowLoadedTestResult = {
+            thisObj: this,
+            state: document.readyState,
+            eventObj: evt
+        };
+    }, true);
 
     function $(selector, multiple) {
         multiple = (multiple === null || multiple === undefined) ? true : multiple;
@@ -25,14 +43,14 @@
     }
 
     function generateTestEvent() {
-        var evt = new window.Event("test");
-        evt.confirmationString = Math.random().toString(36).substring(7);
+        var evt = document.createEvent("CustomEvent");
+        evt.initCustomEvent("test", true, true, Math.random().toString(36).substring(7));
 
         return evt;
     }
 
     function testListener(evt) {
-        dispatchedConfirmationString = evt.confirmationString;
+        dispatchedConfirmationString = evt.detail;
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -44,7 +62,10 @@
         dispatchedConfirmationString = null;
     });
 
-    Q.test("Thin Shortcut Function", function (assert) {
+    /*
+     * Thin Function
+     */
+    Q.test("Thin Query Selector", function (assert) {
         var i,
             thinList,
             nativeList;
@@ -58,6 +79,18 @@
         for (i = 0; i < thinList.length; i += 1) {
             assert.strictEqual(thinList[i], nativeList[i]);
         }
+    });
+
+    Q.test("Thin DOMContentLoaded Binding", function (assert) {
+        assert.strictEqual(DOMContentLoadedTestResult.thisObj, document);
+        assert.equal(DOMContentLoadedTestResult.state, "interactive");
+        assert.equal(DOMContentLoadedTestResult.eventObj.type, "DOMContentLoaded");
+    });
+
+    Q.test("Thin Window Load Binding", function (assert) {
+        assert.strictEqual(WindowLoadedTestResult.thisObj, window);
+        assert.equal(WindowLoadedTestResult.state, "complete");
+        assert.equal(WindowLoadedTestResult.eventObj.type, "load");
     });
 
     /**
@@ -125,7 +158,7 @@
         var evt = generateTestEvent();
         assert.ok($(singleSelector, false).addEventListener("test", testListener) instanceof window.Element);
         assert.ok($(singleSelector, false).dispatchEvent(evt));
-        assert.equal(dispatchedConfirmationString, evt.confirmationString);
+        assert.equal(dispatchedConfirmationString, evt.detail);
     });
 
     Q.test("Remove Element Event Listener", function (assert) {
@@ -276,7 +309,7 @@
         $(multipleSelector).forEach(function (element) {
             evt = generateTestEvent();
             assert.ok(element.dispatchEvent(evt));
-            assert.equal(dispatchedConfirmationString, evt.confirmationString);
+            assert.equal(dispatchedConfirmationString, evt.detail);
         });
     });
 

@@ -6,6 +6,7 @@ Thin JavaScript Utility
 [Features](#features)  
 [Method Reference](#method-reference)  
 [Browser Compatibility](#browser-compatibility)  
+[Release Notes](#release-notes)  
 [License](#license)  
 
 Installation
@@ -27,13 +28,27 @@ Features
 Method Reference
 ----------------
 Next to each method name it is stated whether the method was been *Added* or the existing method was *Altered*
-###General###
-- `Thin(query)` *Added*
+###Thin Shortcut Function###
+*The `Thin` function can perform different shortcut tasks depending on the parameters passed to it.*
+
+####Query Selector####
+- `Thin(query)` *Added*  
     Returns any `Element` that matches the query.
     + query
         - `String`
         - The query to match against.
-    * Returns `NodeList`
+    + Returns `NodeList`
+
+####Page Load Binding####
+- `Thin(listener[, waitForAll])` *Added*  
+    Binds the listener to either the `DOMContentLoaded` (`document.readyState` == `"interactive"`) or `window` `load` (`document.readyState` == `"complete"`) event.
+    + listener
+        - `Function`
+        - The code to be executed upon the load event being fired.
+    + waitForAll
+        - `Boolean`
+        - Whether to wait for all resources to be loaded. A value of `true` will execute the listener upon the `DOMContentLoaded` event being fired. A value of `false` will executre the listener upon the `window` `load` event being fired.
+    + Returns `undefined`
 
 ###Element Interface###
 - `addClass(name[, ...])` *Added*  
@@ -210,6 +225,11 @@ Browser Compatibility
 - **Opera**: 12.00+
 - **Safari**: 5.1+
 
+Release Notes
+-------------
+*Additional information can be found in the CHANGELOG.md file*
+- v1.0.0 - Initial release.
+- v1.1.0 - Additional load binding shortcuts available on the `Thin` function.
 
 License
 -------
