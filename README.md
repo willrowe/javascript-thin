@@ -23,7 +23,7 @@ Features
 - **Group Methods**: Several methods relating to classes, attributes, and events that are available on the `Element` interface are added to the `NodeList` interface as well, so that methods can be called on all `Element`s in a `NodeList` at once.
 - **Property Methods**: These are a shortcut for setting properties directly or by using the array syntax (`Element[propertyName]`), they also have the added bonus of only affecting properties that exist on the interface already. References to non-existent properties will simply be ignored.
 - **Method Chaining**: `Element` and `NodeList` methods will return a reference to themselves when a specific value is not expected.
-- **Query Shortcut**: The `Thin` function is included which is an alias for `document.querySelectorAll`. In conjunction with the **Group Methods** mentioned above, a query for a single `Element` will have the same methods available without needing to extract it from the `NodeList`.
+- **Shortcut Function**: The `Thin` function is included which is an alias for `document.querySelectorAll` as well as several other useful tasks ([see below](#thin-shortcut-function)). In conjunction with the **Group Methods** mentioned above, a query for a single `Element` will have the same methods available without needing to extract it from the `NodeList`.
 
 Method Reference
 ----------------
@@ -212,7 +212,7 @@ Next to each method name it is stated whether the method was been *Added* or the
     https://developer.mozilla.org/en-US/docs/Web/API/EventTarget.addEventListener
     + Returns `NodeList`  
 - `removeEventListener(type, listener, useCapture)` *Added*  
-    This method uses the specifications found here:
+    This method uses the specifications found here:  
     http://www.w3.org/TR/dom/#eventtarget  
     https://developer.mozilla.org/en-US/docs/Web/API/EventTarget.removeEventListener 
     + Returns `NodeList`
