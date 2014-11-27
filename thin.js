@@ -4,6 +4,7 @@
     function bindLoad(listener, waitForAll) {
         if (waitForAll === true) {
             window.addEventListener("load", listener);
+            return;
         }
         document.addEventListener("DOMContentLoaded", listener);
     }
