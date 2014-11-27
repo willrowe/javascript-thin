@@ -47,7 +47,7 @@ Next to each method name it is stated whether the method was been *Added* or the
         - The code to be executed upon the load event being fired.
     + waitForAll
         - `Boolean`
-        - Whether to wait for all resources to be loaded. A value of `true` will execute the listener upon the `DOMContentLoaded` event being fired. A value of `false` will executre the listener upon the `window` `load` event being fired.
+        - Whether to wait for all resources to be loaded. A value of `true` will execute the listener upon the `DOMContentLoaded` event being fired. A value of `false` will execute the listener upon the `window` `load` event being fired.
     + Returns `undefined`
 
 ###Element Interface###
@@ -230,6 +230,7 @@ Release Notes
 *Additional information can be found in the CHANGELOG.md file*
 - v1.0.0 - Initial release.
 - v1.1.0 - Additional load binding shortcuts available on the `Thin` function.
+- v1.1.1 - Bug with load bindings fixed.
 
 License
 -------
