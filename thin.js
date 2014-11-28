@@ -9,6 +9,40 @@
         document.addEventListener("DOMContentLoaded", listener);
     }
 
+    function getInheritedPrototypes(object) {
+        var prototypes = [],
+            parentPrototype = Object.getPrototypeOf(object);
+
+        if (parentPrototype !== null) {
+            prototypes = prototypes.concat(getInheritedPrototypes(parentPrototype));
+            prototypes.push(parentPrototype.constructor.name);
+        }
+
+        return prototypes;
+    }
+
+    function generateRandomClassName() {
+        var randomClassName;
+        do {
+            randomClassName = "thin-rcn-" + Math.random().toString(36).substring(7);
+        } while (document.querySelector("." + randomClassName));
+
+        return randomClassName;
+    }
+
+    function convertToNodeList(object) {
+        if (getInheritedPrototypes(object).indexOf("NodeList") >= 0) {
+            return object;
+        }
+        var randomClassName = generateRandomClassName(),
+            nodeList;
+        object.addClass(randomClassName);
+        nodeList = document.querySelectorAll("." + randomClassName);
+        object.removeClass(randomClassName);
+
+        return nodeList;
+    }
+
     var originalMethods = {
             "Element": {
                 "setAttribute": window.Element.prototype.setAttribute,
@@ -22,9 +56,13 @@
                 thisArg: document,
                 callback: document.querySelectorAll
             },
-            "function(, boolean)?": {
+            "function, boolean?": {
                 thisArg: this,
                 callback: bindLoad
+            },
+            "object:Element|NodeList": {
+                thisArg: this,
+                callback: convertToNodeList
             }
         };
 
@@ -39,18 +77,6 @@
         });
 
         return returnValues;
-    }
-
-    function getInheritedPrototypes(object) {
-        var prototypes = [],
-            parentPrototype = Object.getPrototypeOf(object);
-
-        if (parentPrototype !== null) {
-            prototypes = prototypes.concat(getInheritedPrototypes(parentPrototype));
-            prototypes.push(parentPrototype.constructor.name);
-        }
-
-        return prototypes;
     }
 
     function getTypeString(variable) {
@@ -72,20 +98,38 @@
         return types.join(", ");
     }
 
+    function generateRegex(signature) {
+        var namePattern = "[A-Za-z0-9]+";
+        signature = signature.replace(new RegExp("((?:, )?" + namePattern + ")\\?", "g"), "($1)?").replace(new RegExp("(object:)((?:" + namePattern + "\\|?)+)", "g"), "$1(?:{" + namePattern + "})*{($2)}(?:{" + namePattern + "})*");
+        return new RegExp("^" + signature + "$");
+    }
+
     function matchSignature(args) {
-        var thinSignature,
+        var matches,
+            thinSignature,
             calledSignature = getSignature(args);
         for (thinSignature in thinFunctionSignatures) {
-            if (calledSignature.search(thinSignature) === 0) {
-                return thinFunctionSignatures[thinSignature];
+            matches = calledSignature.match(generateRegex(thinSignature));
+            if (matches !== null) {
+                thinSignature = thinFunctionSignatures[thinSignature];
+                break;
             }
         }
+
+        if (!("arguments" in thinSignature)) {
+            thinSignature.arguments = [];
+        }
+        if (matches.length > 1) {
+            thinSignature.arguments.push(matches[1]);
+        }
+
+        return thinSignature;
     }
 
     window.Thin = function () {
         var signature = matchSignature(arguments);
 
-        return signature.callback.apply(signature.thisArg, arguments);
+        return signature.callback.apply(signature.thisArg, Array.prototype.slice.call(arguments).concat(signature.arguments));
     };
 
     /**

@@ -93,6 +93,16 @@
         assert.equal(WindowLoadedTestResult.eventObj.type, "load");
     });
 
+    Q.test("Thin NodeList Conversion", function (assert) {
+        var nodeList = document.querySelectorAll(multipleSelector);
+        assert.ok(window.Thin(nodeList) instanceof window.NodeList);
+    });
+
+    Q.test("Thin Element Conversion", function (assert) {
+        var element = document.querySelector(singleSelector);
+        assert.ok(window.Thin(element) instanceof window.NodeList);
+    });
+
     /**
      * Element
      */
