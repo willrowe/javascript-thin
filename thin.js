@@ -22,11 +22,7 @@
                 thisArg: document,
                 callback: document.querySelectorAll
             },
-            "function": {
-                thisArg: this,
-                callback: bindLoad
-            },
-            "function, boolean": {
+            "function(, boolean)?": {
                 thisArg: this,
                 callback: bindLoad
             }
@@ -45,17 +41,49 @@
         return returnValues;
     }
 
-    function getTypeStrings(args) {
-        var typeStrings = [];
+    function getInheritedPrototypes(object) {
+        var prototypes = [],
+            parentPrototype = Object.getPrototypeOf(object);
+
+        if (parentPrototype !== null) {
+            prototypes = prototypes.concat(getInheritedPrototypes(parentPrototype));
+            prototypes.push(parentPrototype.constructor.name);
+        }
+
+        return prototypes;
+    }
+
+    function getTypeString(variable) {
+        var type = typeof variable;
+
+        if (type !== "object") {
+            return type;
+        }
+
+        return type + ":{" + getInheritedPrototypes(variable).join("}{") + "}";
+    }
+
+    function getSignature(args) {
+        var types = [];
         forEach(args, function (variable) {
-            typeStrings.push(typeof variable !== "object" ? typeof variable : variable.toString());
+            types.push(getTypeString(variable));
         });
 
-        return typeStrings;
+        return types.join(", ");
+    }
+
+    function matchSignature(args) {
+        var thinSignature,
+            calledSignature = getSignature(args);
+        for (thinSignature in thinFunctionSignatures) {
+            if (calledSignature.search(thinSignature) === 0) {
+                return thinFunctionSignatures[thinSignature];
+            }
+        }
     }
 
     window.Thin = function () {
-        var signature = thinFunctionSignatures[getTypeStrings(arguments).join(", ")];
+        var signature = matchSignature(arguments);
 
         return signature.callback.apply(signature.thisArg, arguments);
     };

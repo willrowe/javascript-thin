@@ -12,7 +12,7 @@ Thin JavaScript Utility
 Installation
 ------------
 1. Download or clone this repository and copy either the `thin.js` or `thin.min.js` file into your website.
-2. Add the utility to the pages that require it with a `script` tag.  
+2. Add the utility to the pages that requires it with a `script` tag.  
 `<script src="path/to/thin.min.js type="text/javascript"></script>`  
 *Make sure that it is the first script loaded if possible. At the very least it should be loaded before any other scripts that uses its methods.*
 3. Start using the utitilty! Take a look at the [Features](#features) and [Method Reference](#method-reference) sections for information on how to get started.
@@ -222,7 +222,7 @@ Browser Compatibility
 - **Chrome**: 8.0+
 - **Firefox**: 6.0+
 - **Internet Explorer**: 10.0+
-- **Opera**: 12.00+
+- **Opera**: 12.10+
 - **Safari**: 5.1+
 
 Release Notes
