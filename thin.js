@@ -1,5 +1,6 @@
 (function (window, document) {
     "use strict";
+    var prototypePatch = Object.getPrototypeOf(document.querySelectorAll("html")).constructor.name === "Object";
 
     function bindLoad(listener, waitForAll) {
         if (waitForAll === true) {
@@ -15,7 +16,7 @@
 
         if (parentPrototype !== null) {
             prototypes = prototypes.concat(getInheritedPrototypes(parentPrototype));
-            prototypes.push(parentPrototype.constructor.name);
+            prototypes.push((prototypePatch ? parentPrototype : parentPrototype.constructor).toString().match("(?:function|\\[object) ([A-Za-z0-9]+)")[1].replace("Prototype", ""));
         }
 
         return prototypes;
@@ -31,16 +32,19 @@
     }
 
     function convertToNodeList(object) {
-        if (getInheritedPrototypes(object).indexOf("NodeList") >= 0) {
+        var prototypes = getInheritedPrototypes(object);
+        if (prototypes.indexOf("NodeList") >= 0) {
             return object;
         }
-        var randomClassName = generateRandomClassName(),
-            nodeList;
-        object.addClass(randomClassName);
-        nodeList = document.querySelectorAll("." + randomClassName);
-        object.removeClass(randomClassName);
+        if (prototypes.indexOf("Element") >= 0) {
+            var randomClassName = generateRandomClassName(),
+                nodeList;
+            object.addClass(randomClassName);
+            nodeList = document.querySelectorAll("." + randomClassName);
+            object.removeClass(randomClassName);
 
-        return nodeList;
+            return nodeList;
+        }
     }
 
     var originalMethods = {
@@ -105,31 +109,20 @@
     }
 
     function matchSignature(args) {
-        var matches,
-            thinSignature,
+        var thinSignature,
             calledSignature = getSignature(args);
+
         for (thinSignature in thinFunctionSignatures) {
-            matches = calledSignature.match(generateRegex(thinSignature));
-            if (matches !== null) {
-                thinSignature = thinFunctionSignatures[thinSignature];
-                break;
+            if (calledSignature.match(generateRegex(thinSignature)) !== null) {
+                return thinFunctionSignatures[thinSignature];
             }
         }
-
-        if (!("arguments" in thinSignature)) {
-            thinSignature.arguments = [];
-        }
-        if (matches.length > 1) {
-            thinSignature.arguments.push(matches[1]);
-        }
-
-        return thinSignature;
     }
 
     window.Thin = function () {
         var signature = matchSignature(arguments);
 
-        return signature.callback.apply(signature.thisArg, Array.prototype.slice.call(arguments).concat(signature.arguments));
+        return signature.callback.apply(signature.thisArg, arguments);
     };
 
     /**
