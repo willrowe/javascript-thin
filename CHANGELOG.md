@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-v1.2.0 (2015.01.??)
+v1.2.0 (2015.01.05)
 -------------------
 - A different way of parsing the different `Thin` function signatures was implemented which pushes the minimum supported version of Opera up to 12.10. All other browsers remain the same.
 - An instance of `NodeList` or `Element` can be passed to the `Thin` function and an instance of `NodeList` will be returned representing the same elements.

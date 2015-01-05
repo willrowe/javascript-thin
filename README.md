@@ -248,7 +248,7 @@ Browser Compatibility
 Release Notes
 -------------
 *Additional information can be found in the [CHANGELOG.md](CHANGELOG.md) file*
-- [v1.2.0](CHANGELOG.md#v120-201501??) - `NodeList` conforming and subquery selection added.
+- [v1.2.0](CHANGELOG.md#v120-20150105) - `NodeList` conforming and subquery selection added.
 - [v1.1.1](CHANGELOG.md#v111-20141127) - Bug with load bindings fixed.
 - [v1.1.0](CHANGELOG.md#v110-20141104) - Additional load binding shortcuts available on the `Thin` function.
 - [v1.0.0](CHANGELOG.md#v100-20141104) - Initial release.
