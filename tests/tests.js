@@ -3,6 +3,7 @@
 
     var singleSelector = ".menu",
         multipleSelector = ".menu-item",
+        nestedSelector = ".sub-menu-item",
         singleFormSelector = "form input[type=checkbox][name=checkbox1]",
         multipleFormSelector = "form input[type=checkbox]",
         sandboxSelector = "#sandbox",
@@ -372,4 +373,19 @@
         assert.ok(!$(multipleFormSelector).hasProperty("foo"));
     });
 
+    // Query Methods
+    Q.test("Single Query Select NodeList", function (assert) {
+        assert.equal($(multipleSelector).querySelector(nestedSelector), $(nestedSelector)[0]);
+    });
+
+    Q.test("Multiple Query Select Nodelist", function (assert) {
+        var subResults = $(multipleSelector).querySelectorAll(nestedSelector),
+            globResults = $(nestedSelector),
+            i;
+
+        assert.equal(subResults.length, globResults.length);
+        for (i = 0; i < subResults.length; i += 1) {
+            assert.equal(subResults[i], globResults[i]);
+        }
+    });
 }(window.QUnit));

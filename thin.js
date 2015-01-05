@@ -10,6 +10,10 @@
         document.addEventListener("DOMContentLoaded", listener);
     }
 
+    function forEach(object, callback, thisArg) {
+        window.Array.prototype.forEach.call(object, callback, thisArg);
+    }
+
     function getInheritedPrototypes(object) {
         var prototypes = [],
             parentPrototype = Object.getPrototypeOf(object);
@@ -31,20 +35,20 @@
         return randomClassName;
     }
 
-    function convertToNodeList(object) {
-        var prototypes = getInheritedPrototypes(object);
-        if (prototypes.indexOf("NodeList") >= 0) {
-            return object;
-        }
-        if (prototypes.indexOf("Element") >= 0) {
-            var randomClassName = generateRandomClassName(),
-                nodeList;
-            object.addClass(randomClassName);
-            nodeList = document.querySelectorAll("." + randomClassName);
-            object.removeClass(randomClassName);
+    function convertToNodeList() {
+        var randomClassName = generateRandomClassName(),
+            nodeList;
 
-            return nodeList;
-        }
+        forEach(arguments, function (object) {
+            var prototypes = getInheritedPrototypes(object);
+            if (prototypes.indexOf("NodeList") >= 0 || prototypes.indexOf("Element") >= 0) {
+                object.addClass(randomClassName);
+            }
+        });
+        nodeList = document.querySelectorAll("." + randomClassName);
+        nodeList.removeClass(randomClassName);
+
+        return nodeList;
     }
 
     var originalMethods = {
@@ -69,10 +73,6 @@
                 callback: convertToNodeList
             }
         };
-
-    function forEach(object, callback, thisArg) {
-        window.Array.prototype.forEach.call(object, callback, thisArg);
-    }
 
     function callEach(object, functionName, args) {
         var returnValues = [];
@@ -291,5 +291,20 @@
         callEach(this, "removeEventListener", [type, listener, useCapture]);
 
         return this;
+    };
+
+    // Query
+    window.NodeList.prototype.querySelector = function (selector) {
+        var results = callEach(this, "querySelector", [selector]);
+
+        return results.filter(function (elements) {
+            return elements !== null;
+        })[0] || [];
+    };
+
+    window.NodeList.prototype.querySelectorAll = function (selector) {
+        var results = callEach(this, "querySelectorAll", [selector]);
+
+        return convertToNodeList.apply(null, results);
     };
 }(window, document));

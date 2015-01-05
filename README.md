@@ -47,8 +47,16 @@ Next to each method name it is stated whether the method was been *Added* or the
         - The code to be executed upon the load event being fired.
     + waitForAll
         - `Boolean`
-        - Whether to wait for all resources to be loaded. A value of `true` will execute the listener upon the `DOMContentLoaded` event being fired. A value of `false` will execute the listener upon the `window` `load` event being fired.
+        - Whether to wait for all resources to be loaded. A value of `true` will execute the listener upon the `window` `load` event being fired. A value of `false` will execute the listener upon the `document` `DOMContentLoaded` event being fired.
     + Returns `undefined`
+
+####NodeList Casting####
+- `Thin(object)` *Added*  
+    Takes the passed object and returns it as a `NodeList`. 
+    + object
+        - `Element` or `NodeList`
+        - The object to be converted to a `NodeList`.
+    + Returns `NodeList`
 
 ###Element Interface###
 - `addClass(name[, ...])` *Added*  
@@ -216,6 +224,18 @@ Next to each method name it is stated whether the method was been *Added* or the
     http://www.w3.org/TR/dom/#eventtarget  
     https://developer.mozilla.org/en-US/docs/Web/API/EventTarget.removeEventListener 
     + Returns `NodeList`
+- `querySelector(selector)` *Added*  
+    Returns the first element to match the selector that is a descendant of one of the elements in the `NodeList`.
+    + selector
+        - `String`
+        - The selector to match the elements against.
+    + Returns `Element`
+- `querySelectorAll(selector)` *Added*  
+    Returns all elements that match the selector which are descendants of the elements in the `NodeList`.
+    + selector
+        - `String`
+        - The selector to match the elements against.
+    + Returns `NodeList`
 
 Browser Compatibility
 ---------------------
@@ -227,10 +247,11 @@ Browser Compatibility
 
 Release Notes
 -------------
-*Additional information can be found in the CHANGELOG.md file*
-- v1.0.0 - Initial release.
-- v1.1.0 - Additional load binding shortcuts available on the `Thin` function.
-- v1.1.1 - Bug with load bindings fixed.
+*Additional information can be found in the [CHANGELOG.md](CHANGELOG.md) file*
+- [v1.2.0](CHANGELOG.md#v120-201501??) - `NodeList` conforming and subquery selection added.
+- [v1.1.1](CHANGELOG.md#v111-20141127) - Bug with load bindings fixed.
+- [v1.1.0](CHANGELOG.md#v110-20141104) - Additional load binding shortcuts available on the `Thin` function.
+- [v1.0.0](CHANGELOG.md#v100-20141104) - Initial release.
 
 License
 -------
