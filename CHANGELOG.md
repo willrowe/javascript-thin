@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+v1.2.1 (2016.02.01)
+-------------------
+- The `NodeList` conversion functionality now accepts and combines multiple `Element` and `NodeList` parameters into one single `NodeList`. Previously only one parameter was accepted even though the underlying code could handle multiple.
+
 v1.2.0 (2015.01.05)
 -------------------
 - A different way of parsing the different `Thin` function signatures was implemented which pushes the minimum supported version of Opera up to 12.10. All other browsers remain the same.
