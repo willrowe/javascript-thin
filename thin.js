@@ -103,9 +103,25 @@
     }
 
     function generateRegex(signature) {
-        var namePattern = "[A-Za-z0-9]+";
-        signature = signature.replace(new RegExp("((?:, )?" + namePattern + ")\\?", "g"), "($1)?").replace(new RegExp("(object:)((?:" + namePattern + "\\|?)+)", "g"), "$1(?:{" + namePattern + "})*{($2)}(?:{" + namePattern + "})*");
-        return new RegExp("^" + signature + "$");
+        var parameters = signature.split(new RegExp(", ?"));
+
+        parameters = parameters.map(function (parameter, index) {
+            parameter = (index > 0 ? ", " : "") + parameter;
+
+            // convert optional parameters
+            parameter = parameter.replace(new RegExp("^(, )?(.*)\\?$"), "($1$2)?");
+
+            // convert multiple parameters
+            parameter = parameter.replace(new RegExp("^(, )?(.*)\\+$"), "($1$2(, )?)+");
+
+            // convert object type parameter to handle inheritance correctly
+            parameter = parameter.replace(new RegExp("^(\\(?(?:, )?)object:((?:[^\\|\\(\\)]+\\|?)+)(\\)\\?|\\(, \\)\\?\\)\\+)?$"), "$1object:({[^}]+})*{($2)}({[^}]+})*$3");
+
+            return parameter;
+        });
+
+
+        return new RegExp("^" + parameters.join("") + "$");
     }
 
     function matchSignature(args) {
