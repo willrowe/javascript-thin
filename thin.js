@@ -68,7 +68,7 @@
                 thisArg: this,
                 callback: bindLoad
             },
-            "object:Element|NodeList": {
+            "object:Element|NodeList+": {
                 thisArg: this,
                 callback: convertToNodeList
             }

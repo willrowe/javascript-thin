@@ -2,7 +2,9 @@
     "use strict";
 
     var singleSelector = ".menu",
+        singleSelectorAlt = ".menu-alt",
         multipleSelector = ".menu-item",
+        multipleSelectorAlt = ".menu-item-alt",
         nestedSelector = ".sub-menu-item",
         singleFormSelector = "form input[type=checkbox][name=checkbox1]",
         multipleFormSelector = "form input[type=checkbox]",
@@ -95,13 +97,24 @@
     });
 
     Q.test("Thin NodeList Conversion", function (assert) {
-        var nodeList = document.querySelectorAll(multipleSelector);
+        var nodeList = document.querySelectorAll(multipleSelector),
+            nodeListAlt = document.querySelectorAll(multipleSelectorAlt),
+            element = document.querySelector(singleSelector),
+            elementAlt = document.querySelector(singleSelectorAlt);
+        // Single NodeList
         assert.ok(window.Thin(nodeList) instanceof window.NodeList);
-    });
 
-    Q.test("Thin Element Conversion", function (assert) {
-        var element = document.querySelector(singleSelector);
+        // Multiple NodeLists
+        assert.ok(window.Thin(nodeList, nodeListAlt) instanceof window.NodeList);
+
+        // Single Element
         assert.ok(window.Thin(element) instanceof window.NodeList);
+
+        // Multiple Elements
+        assert.ok(window.Thin(element, elementAlt) instanceof window.NodeList);
+
+        // Multiple Mixed
+        assert.ok(window.Thin(element, nodeListAlt, nodeList, elementAlt) instanceof window.NodeList);
     });
 
     /**
