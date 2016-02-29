@@ -1,6 +1,37 @@
-(function (Q) {
-    "use strict";
+var fixture = require('./fixture.html'),
+    originalKarmaStart = window.__karma__.start,
+    DOMContentLoadedTestResult,
+    WindowLoadedTestResult;
 
+
+// Prevent karma from starting right away
+window.__karma__.start = function () {};
+
+// Attach listeners so they can be tested
+window.Thin(function (evt) {
+    DOMContentLoadedTestResult = {
+        thisObj: this,
+        state: document.readyState,
+        eventObj: evt
+    };
+});
+
+window.Thin(function (evt) {
+    WindowLoadedTestResult = {
+        thisObj: this,
+        state: document.readyState,
+        eventObj: evt
+    };
+}, true);
+
+// Start karma once everything has been loaded
+window.addEventListener("load", function () {
+    window.__karma__.start = originalKarmaStart;
+    window.__karma__.start();
+});
+
+
+describe('Thin', function () {
     var singleSelector = ".menu",
         singleSelectorAlt = ".menu-alt",
         multipleSelector = ".menu-item",
@@ -8,27 +39,12 @@
         nestedSelector = ".sub-menu-item",
         singleFormSelector = "form input[type=checkbox][name=checkbox1]",
         multipleFormSelector = "form input[type=checkbox]",
-        sandboxSelector = "#sandbox",
-        originalSandboxNode,
-        dispatchedConfirmationString,
-        DOMContentLoadedTestResult,
-        WindowLoadedTestResult;
+        dispatchedConfirmationString;
 
-    window.Thin(function (evt) {
-        DOMContentLoadedTestResult = {
-            thisObj: this,
-            state: document.readyState,
-            eventObj: evt
-        };
+    beforeEach(function () {
+        document.body.innerHTML = fixture;
+        dispatchedConfirmationString = null;
     });
-
-    window.Thin(function (evt) {
-        WindowLoadedTestResult = {
-            thisObj: this,
-            state: document.readyState,
-            eventObj: evt
-        };
-    }, true);
 
     function $(selector, multiple) {
         multiple = (multiple === null || multiple === undefined) ? true : multiple;
@@ -38,11 +54,6 @@
         }
 
         return document.querySelector(selector);
-    }
-
-    function cleanSandbox() {
-        var sandboxNode = document.querySelector(sandboxSelector);
-        sandboxNode.parentNode.replaceChild(originalSandboxNode.cloneNode(true), sandboxNode);
     }
 
     function generateTestEvent() {
@@ -56,349 +67,330 @@
         dispatchedConfirmationString = evt.detail;
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        originalSandboxNode = document.querySelector(sandboxSelector).cloneNode(true);
-    });
-
-    Q.testStart(function () {
-        cleanSandbox();
-        dispatchedConfirmationString = null;
-    });
-
     /*
-     * Thin Function
+        Tests
      */
-    Q.test("Thin Query Selector", function (assert) {
+    it('should be registered in the global `window` object', function () {
+        expect(window.Thin).toBeDefined();
+    });
+
+    it('should return an instance of `NodeList`', function () {
         var i,
             thinList,
             nativeList;
 
-        assert.ok(window.Thin(singleSelector) instanceof window.NodeList);
-        assert.strictEqual(window.Thin(singleSelector)[0], document.querySelectorAll(singleSelector)[0]);
+        expect(window.Thin(singleSelector) instanceof window.NodeList).toBe(true);
+        expect(window.Thin(singleSelector)[0]).toBe(document.querySelectorAll(singleSelector)[0]);
 
         thinList = window.Thin(multipleSelector);
         nativeList = document.querySelectorAll(multipleSelector);
-        assert.ok(thinList instanceof window.NodeList);
+        expect(thinList instanceof window.NodeList).toBe(true);
         for (i = 0; i < thinList.length; i += 1) {
-            assert.strictEqual(thinList[i], nativeList[i]);
+            expect(thinList[i]).toBe(nativeList[i]);
         }
     });
 
-    Q.test("Thin DOMContentLoaded Binding", function (assert) {
-        assert.strictEqual(DOMContentLoadedTestResult.thisObj, document);
-        assert.equal(DOMContentLoadedTestResult.state, "interactive");
-        assert.equal(DOMContentLoadedTestResult.eventObj.type, "DOMContentLoaded");
+    it("should bind to DOMContentLoaded event", function () {
+        expect(DOMContentLoadedTestResult.thisObj).toBe(document);
+        expect(DOMContentLoadedTestResult.state).toEqual("interactive");
+        expect(DOMContentLoadedTestResult.eventObj.type).toEqual("DOMContentLoaded");
     });
 
-    Q.test("Thin Window Load Binding", function (assert) {
-        assert.strictEqual(WindowLoadedTestResult.thisObj, window);
-        assert.equal(WindowLoadedTestResult.state, "complete");
-        assert.equal(WindowLoadedTestResult.eventObj.type, "load");
+    it("should bind to the window load event", function () {
+        expect(WindowLoadedTestResult.thisObj).toBe(window);
+        expect(WindowLoadedTestResult.state).toEqual("complete");
+        expect(WindowLoadedTestResult.eventObj.type).toEqual("load");
     });
 
-    Q.test("Thin NodeList Conversion", function (assert) {
+    it("should convert `Element` and `NodeList` objects to a single `NodeList`", function () {
         var nodeList = document.querySelectorAll(multipleSelector),
             nodeListAlt = document.querySelectorAll(multipleSelectorAlt),
             element = document.querySelector(singleSelector),
             elementAlt = document.querySelector(singleSelectorAlt);
+
         // Single NodeList
-        assert.ok(window.Thin(nodeList) instanceof window.NodeList);
+        expect(window.Thin(nodeList) instanceof window.NodeList).toBe(true);
 
         // Multiple NodeLists
-        assert.ok(window.Thin(nodeList, nodeListAlt) instanceof window.NodeList);
+        expect(window.Thin(nodeList, nodeListAlt) instanceof window.NodeList).toBe(true);
 
         // Single Element
-        assert.ok(window.Thin(element) instanceof window.NodeList);
+        expect(window.Thin(element) instanceof window.NodeList).toBe(true);
 
         // Multiple Elements
-        assert.ok(window.Thin(element, elementAlt) instanceof window.NodeList);
+        expect(window.Thin(element, elementAlt) instanceof window.NodeList).toBe(true);
 
         // Multiple Mixed
-        assert.ok(window.Thin(element, nodeListAlt, nodeList, elementAlt) instanceof window.NodeList);
+        expect(window.Thin(element, nodeListAlt, nodeList, elementAlt) instanceof window.NodeList).toBe(true);
     });
 
-    /**
-     * Element
-     */
-
-    // Class Methods
-    Q.test("Add Element Class", function (assert) {
+    it("should add classes to an `Element`", function () {
         // One Class
-        assert.ok($(singleSelector, false).addClass("foo") instanceof window.Element);
-        assert.ok($(singleSelector, false).className.indexOf("foo") >= 0);
+        expect($(singleSelector, false).addClass("foo") instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).className.indexOf("foo") >= 0).toBe(true);
 
         // Multiple Classes
-        assert.ok($(singleSelector, false).addClass("foo", "bar") instanceof window.Element);
-        assert.ok($(singleSelector, false).className.indexOf("foo") >= 0);
-        assert.ok($(singleSelector, false).className.indexOf("bar") >= 0);
+        expect($(singleSelector, false).addClass("foo", "bar") instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).className.indexOf("foo") >= 0).toBe(true);
+        expect($(singleSelector, false).className.indexOf("bar") >= 0).toBe(true);
     });
 
-    Q.test("Remove Element Class", function (assert) {
+    it("should remove classes from an `Element`", function () {
         // One Class
         $(singleSelector, false).addClass("foo");
-        assert.ok($(singleSelector, false).removeClass("foo") instanceof window.Element);
-        assert.equal($(singleSelector, false).className.indexOf("foo"), -1);
+        expect($(singleSelector, false).removeClass("foo") instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).className.indexOf("foo")).toEqual(-1);
 
         // Multiple Classes
         $(singleSelector, false).addClass("foo", "bar");
         $(singleSelector, false).removeClass("foo", "bar");
-        assert.equal($(singleSelector, false).className.indexOf("foo"), -1);
-        assert.equal($(singleSelector, false).className.indexOf("bar"), -1);
+        expect($(singleSelector, false).className.indexOf("foo")).toEqual(-1);
+        expect($(singleSelector, false).className.indexOf("bar")).toEqual(-1);
     });
 
-    Q.test("Element Has Class", function (assert) {
+    it("should detect if an `Element` has a class", function () {
         $(singleSelector, false).addClass("foo");
-        assert.ok($(singleSelector, false).hasClass("foo"));
-        assert.equal($(singleSelector, false).hasClass("bar"), false);
+        expect($(singleSelector, false).hasClass("foo")).toBe(true);
+        expect($(singleSelector, false).hasClass("bar")).toBe(false);
     });
 
-    // Attribute Methods
-    Q.test("Set Element Attribute", function (assert) {
+    it("should set `Element` attributes", function () {
         // One Attribute
-        assert.ok($(singleSelector, false).setAttribute("data-foo", "bar") instanceof window.Element);
-        assert.equal($(singleSelector, false).attributes.getNamedItem("data-foo").value, "bar");
+        expect($(singleSelector, false).setAttribute("data-foo", "bar") instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).attributes.getNamedItem("data-foo").value).toEqual("bar");
 
         // Multiple Attributes
-        assert.ok($(singleSelector, false).setAttribute({"data-foo": "bar", "data-baz": "qux"}) instanceof window.Element);
-        assert.equal($(singleSelector, false).attributes.getNamedItem("data-foo").value, "bar");
-        assert.equal($(singleSelector, false).attributes.getNamedItem("data-baz").value, "qux");
+        expect($(singleSelector, false).setAttribute({"data-foo": "bar", "data-baz": "qux"}) instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).attributes.getNamedItem("data-foo").value).toEqual("bar");
+        expect($(singleSelector, false).attributes.getNamedItem("data-baz").value).toEqual("qux");
     });
 
-    Q.test("Remove Element Attribute", function (assert) {
+    it("should remove `Element` attributes", function () {
         // One Attribute
         $(singleSelector, false).setAttribute("data-foo", "bar");
-        assert.ok($(singleSelector, false).removeAttribute("data-foo") instanceof window.Element);
-        assert.ok(!$(singleSelector, false).hasAttribute("data-foo"));
+        expect($(singleSelector, false).removeAttribute("data-foo") instanceof window.Element).toBe(true);
+        expect(!$(singleSelector, false).hasAttribute("data-foo")).toBe(true);
 
         // Multiple Attributes
         $(singleSelector, false).setAttribute({"data-foo": "bar", "data-baz": "qux"});
-        assert.ok($(singleSelector, false).removeAttribute("data-foo", "data-baz") instanceof window.Element);
-        assert.ok(!$(singleSelector, false).hasAttribute("data-foo"));
-        assert.ok(!$(singleSelector, false).hasAttribute("data-baz"));
+        expect($(singleSelector, false).removeAttribute("data-foo", "data-baz") instanceof window.Element).toBe(true);
+        expect(!$(singleSelector, false).hasAttribute("data-foo")).toBe(true);
+        expect(!$(singleSelector, false).hasAttribute("data-baz")).toBe(true);
     });
 
-    // Event Methods
-    Q.test("Add Element Event Listener", function (assert) {
+    it("should add an event listener to an `Element`", function () {
         var evt = generateTestEvent();
-        assert.ok($(singleSelector, false).addEventListener("test", testListener) instanceof window.Element);
-        assert.ok($(singleSelector, false).dispatchEvent(evt));
-        assert.equal(dispatchedConfirmationString, evt.detail);
+        expect($(singleSelector, false).addEventListener("test", testListener) instanceof window.Element).toBe(true);
+        expect($(singleSelector, false).dispatchEvent(evt)).toBe(true);
+        expect(dispatchedConfirmationString).toEqual(evt.detail);
     });
 
-    Q.test("Remove Element Event Listener", function (assert) {
+    it("should remove an event listener from an `Element`", function () {
         $(singleSelector, false).addEventListener("test", testListener);
-        assert.ok($(singleSelector, false).removeEventListener("test", testListener) instanceof window.Element);
+        expect($(singleSelector, false).removeEventListener("test", testListener) instanceof window.Element).toBe(true);
         $(singleSelector, false).dispatchEvent(generateTestEvent());
-        assert.strictEqual(dispatchedConfirmationString, null);
+        expect(dispatchedConfirmationString).toBe(null);
     });
 
-    // Property Methods
-    Q.test("Set Element Property", function (assert) {
+    it("should set a single property on an `Element`", function () {
         // One Property
-        assert.ok($(singleFormSelector, false).setProperty("title", "quux") instanceof window.Element);
-        assert.equal($(singleFormSelector, false).title, "quux");
+        expect($(singleFormSelector, false).setProperty("title", "quux") instanceof window.Element).toBe(true);
+        expect($(singleFormSelector, false).title).toEqual("quux");
 
-        assert.ok($(singleFormSelector, false).setProperty("foo", "bar") instanceof window.Element);
-        assert.ok(!$(singleFormSelector, false).hasOwnProperty("foo"));
+        expect($(singleFormSelector, false).setProperty("foo", "bar") instanceof window.Element);
+        expect(!$(singleFormSelector, false).hasOwnProperty("foo"));
+    });
 
+    it("should set multiple properties on an `Element`", function () {
         // Multiple Properties
-        cleanSandbox();
-        assert.ok($(singleFormSelector, false).setProperty({"title": "quux", "lang": "corge"}) instanceof window.Element);
-        assert.equal($(singleFormSelector, false).title, "quux");
-        assert.equal($(singleFormSelector, false).lang, "corge");
+        expect($(singleFormSelector, false).setProperty({"title": "quux", "lang": "corge"}) instanceof window.Element);
+        expect($(singleFormSelector, false).title).toEqual("quux");
+        expect($(singleFormSelector, false).lang).toEqual("corge");
 
-        assert.ok($(singleFormSelector, false).setProperty({"foo": "bar", "baz": "qux"}) instanceof window.Element);
-        assert.ok(!$(singleFormSelector, false).hasOwnProperty("foo"));
-        assert.ok(!$(singleFormSelector, false).hasOwnProperty("baz"));
+        expect($(singleFormSelector, false).setProperty({"foo": "bar", "baz": "qux"}) instanceof window.Element).toBe(true);
+        expect(!$(singleFormSelector, false).hasOwnProperty("foo")).toBe(true);
+        expect(!$(singleFormSelector, false).hasOwnProperty("baz")).toBe(true);
     });
 
-    Q.test("Get Element Property", function (assert) {
+    it("should return the value of a property on an `Element`", function () {
         $(singleFormSelector, false).title = "quux";
-        assert.equal($(singleFormSelector, false).getProperty("title"), "quux");
+        expect($(singleFormSelector, false).getProperty("title")).toEqual("quux");
 
-        assert.strictEqual($(singleFormSelector, false).getProperty("foo"), undefined);
+        expect($(singleFormSelector, false).getProperty("foo")).toBe(undefined);
     });
 
-    Q.test("Element Has Property", function (assert) {
-        assert.ok($(singleFormSelector, false).hasProperty("title"));
-        assert.ok(!$(singleFormSelector, false).hasProperty("foo"));
+    it("should detect if an `Element` has property", function () {
+        expect($(singleFormSelector, false).hasProperty("title")).toBe(true);
+        expect(!$(singleFormSelector, false).hasProperty("foo")).toBe(true);
     });
 
-    /**
-     * NodeList
-     */
-
-    Q.test("NodeList forEach", function (assert) {
+    it("should apply a function to each `Element` in a `NodeList`", function () {
         var elements = $(multipleSelector),
             index = 0;
 
-        assert.ok($(multipleSelector).forEach(function (element) {
-            assert.strictEqual(element, elements[index]);
+        expect($(multipleSelector).forEach(function (element) {
+            expect(element).toBe(elements[index]);
             index += 1;
-        }) instanceof window.NodeList);
+        }) instanceof window.NodeList).toBe(true);
     });
 
-    // Class Methods
-    Q.test("Add NodeList Class", function (assert) {
+    it("should add classes to each `Element` in a `NodeList`", function () {
         // Single Class
-        assert.ok($(multipleSelector).addClass("foo") instanceof window.NodeList);
+        expect($(multipleSelector).addClass("foo") instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.ok(element.className.indexOf("foo") >= 0);
+            expect(element.className.indexOf("foo") >= 0).toBe(true);
         });
 
         // Multiple Classes
         $(multipleSelector).addClass("foo", "bar");
         $(multipleSelector).forEach(function (element) {
-            assert.ok(element.className.indexOf("foo") >= 0);
-            assert.ok(element.className.indexOf("bar") >= 0);
+            expect(element.className.indexOf("foo") >= 0).toBe(true);
+            expect(element.className.indexOf("bar") >= 0).toBe(true);
         });
     });
 
-    Q.test("Remove NodeList Class", function (assert) {
+    it("should remove classes from each `Element` in a `NodeList`", function () {
         $(multipleSelector).addClass("foo");
-        assert.ok($(multipleSelector).removeClass("foo") instanceof window.NodeList);
+        expect($(multipleSelector).removeClass("foo") instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.equal(element.className.indexOf("foo"), -1);
+            expect(element.className.indexOf("foo")).toEqual(-1);
         });
 
         $(multipleSelector).addClass("foo", "bar");
         $(multipleSelector).removeClass("foo", "bar");
         $(multipleSelector).forEach(function (element) {
-            assert.equal(element.className.indexOf("foo"), -1);
-            assert.equal(element.className.indexOf("bar"), -1);
+            expect(element.className.indexOf("foo")).toEqual(-1);
+            expect(element.className.indexOf("bar")).toEqual(-1);
         });
     });
 
-    Q.test("NodeList Has Class", function (assert) {
-        assert.equal($(multipleSelector).hasClass("foo"), false);
+    it("should detect if the first `Element` in a `NodeList` has a class", function () {
+        expect($(multipleSelector).hasClass("foo")).toBe(false);
         $(multipleSelector)[0].addClass("foo");
-        assert.ok($(multipleSelector).hasClass("foo"));
+        expect($(multipleSelector).hasClass("foo")).toBe(true);
         $(multipleSelector).addClass("foo");
-        assert.ok($(multipleSelector).hasClass("foo"));
-        assert.equal($(multipleSelector).hasClass("bar"), false);
+        expect($(multipleSelector).hasClass("foo")).toBe(true);
+        expect($(multipleSelector).hasClass("bar")).toBe(false);
     });
 
-    // Attribute Methods
-    Q.test("Set NodeList Attribute", function (assert) {
+    it("should set attributes on each `Element` in a `NodeList`", function () {
         // One Attribute
-        assert.ok($(multipleSelector).setAttribute("data-foo", "bar") instanceof window.NodeList);
+        expect($(multipleSelector).setAttribute("data-foo", "bar") instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.equal(element.getAttribute("data-foo"), "bar");
+            expect(element.getAttribute("data-foo")).toEqual("bar");
         });
 
         // Multiple Attributes
-        assert.ok($(multipleSelector).setAttribute({"data-foo": "bar", "data-baz": "qux"}) instanceof window.NodeList);
+        expect($(multipleSelector).setAttribute({"data-foo": "bar", "data-baz": "qux"}) instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.equal(element.getAttribute("data-foo"), "bar");
-            assert.equal(element.getAttribute("data-baz"), "qux");
+            expect(element.getAttribute("data-foo")).toEqual("bar");
+            expect(element.getAttribute("data-baz")).toEqual("qux");
         });
     });
 
-    Q.test("Remove NodeList Attribute", function (assert) {
+    it("should remove attributes from each `Element` in a `NodeList`", function () {
         // One Attribute
         $(multipleSelector).setAttribute("data-foo", "bar");
-        assert.ok($(multipleSelector).removeAttribute("data-foo", "bar") instanceof window.NodeList);
+        expect($(multipleSelector).removeAttribute("data-foo", "bar") instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.ok(!element.hasAttribute("data-foo"));
+            expect(!element.hasAttribute("data-foo")).toBe(true);
         });
 
         // Multiple Attributes
         $(multipleSelector).setAttribute({"data-foo": "bar", "data-baz": "qux"});
-        assert.ok($(multipleSelector).removeAttribute("data-foo", "data-baz") instanceof window.NodeList);
+        expect($(multipleSelector).removeAttribute("data-foo", "data-baz") instanceof window.NodeList).toBe(true);
         $(multipleSelector).forEach(function (element) {
-            assert.ok(!element.hasAttribute("data-foo"));
-            assert.ok(!element.hasAttribute("data-baz"));
+            expect(!element.hasAttribute("data-foo")).toBe(true);
+            expect(!element.hasAttribute("data-baz")).toBe(true);
         });
     });
 
-    Q.test("NodeList Has Attribute", function (assert) {
-        assert.ok(!$(multipleSelector).hasAttribute("data-foo"));
+    it("should detect if the first `Element` in a `NodeList` has attributes", function () {
+        expect(!$(multipleSelector).hasAttribute("data-foo")).toBe(true);
         $(multipleSelector)[0].setAttribute("data-foo", "bar");
-        assert.ok($(multipleSelector).hasAttribute("data-foo"));
+        expect($(multipleSelector).hasAttribute("data-foo")).toBe(true);
         $(multipleSelector).setAttribute("data-foo", "bar");
-        assert.ok($(multipleSelector).hasAttribute("data-foo"));
-        assert.ok(!$(multipleSelector).hasAttribute("data-baz"));
+        expect($(multipleSelector).hasAttribute("data-foo")).toBe(true);
+        expect(!$(multipleSelector).hasAttribute("data-baz")).toBe(true);
     });
 
-    Q.test("Get NodeList Attribute", function (assert) {
+    it("should get an attribute from the first `Element` in a `NodeList`", function () {
         $(multipleSelector)[0].setAttribute("data-foo", "bar");
-        assert.equal($(multipleSelector).getAttribute("data-foo"), "bar");
+        expect($(multipleSelector).getAttribute("data-foo")).toEqual("bar");
     });
 
-    // Event Methods
-    Q.test("Add NodeList Event Listener", function (assert) {
+    it("should add an event listener to each `Element` in a `NodeList`", function () {
         var evt;
-        assert.ok($(multipleSelector).addEventListener("test", testListener) instanceof window.NodeList);
+        expect($(multipleSelector).addEventListener("test", testListener) instanceof window.NodeList).toBe(true);
 
         $(multipleSelector).forEach(function (element) {
             evt = generateTestEvent();
-            assert.ok(element.dispatchEvent(evt));
-            assert.equal(dispatchedConfirmationString, evt.detail);
+            expect(element.dispatchEvent(evt)).toBe(true);
+            expect(dispatchedConfirmationString).toEqual(evt.detail);
         });
     });
 
-    Q.test("Remove NodeList Event Listener", function (assert) {
+    it("should remove an event listener from each `Element` in a `NodeList`", function () {
         $(multipleSelector).addEventListener("test", testListener);
-        assert.ok($(multipleSelector).removeEventListener("test", testListener) instanceof window.NodeList);
+        expect($(multipleSelector).removeEventListener("test", testListener) instanceof window.NodeList).toBe(true);
 
         $(multipleSelector).forEach(function (element) {
             element.dispatchEvent(generateTestEvent());
-            assert.strictEqual(dispatchedConfirmationString, null);
+            expect(dispatchedConfirmationString).toBe(null);
         });
     });
 
-    // Property Methods
-    Q.test("Set NodeList Property", function (assert) {
+    it("should set a single property on each `Element` in a `NodeList`", function () {
         // One Property
-        assert.ok($(multipleFormSelector).setProperty("title", "quux") instanceof window.NodeList);
+        expect($(multipleFormSelector).setProperty("title", "quux") instanceof window.NodeList).toBe(true);
         $(multipleFormSelector).forEach(function (element) {
-            assert.equal(element.title, "quux");
+            expect(element.title).toEqual("quux");
         });
 
-        assert.ok($(multipleFormSelector).setProperty("foo", "bar") instanceof window.NodeList);
+        expect($(multipleFormSelector).setProperty("foo", "bar") instanceof window.NodeList).toBe(true);
         $(multipleFormSelector).forEach(function (element) {
-            assert.ok(!element.hasOwnProperty("foo"));
+            expect(!element.hasOwnProperty("foo")).toBe(true);
         });
+    });
 
+    it("should set multiple properties on each `Element` in a `NodeList`", function () {
         // Multiple Properties
-        cleanSandbox();
-        assert.ok($(multipleFormSelector).setProperty({"title": "quux", "lang": "corge"}) instanceof window.NodeList);
+        expect($(multipleFormSelector).setProperty({"title": "quux", "lang": "corge"}) instanceof window.NodeList).toBe(true);
         $(multipleFormSelector).forEach(function (element) {
-            assert.equal(element.title, "quux");
-            assert.equal(element.lang, "corge");
+            expect(element.title).toEqual("quux");
+            expect(element.lang).toEqual("corge");
         });
 
-        assert.ok($(multipleFormSelector).setProperty({"foo": "bar", "baz": "qux"}) instanceof window.NodeList);
+        expect($(multipleFormSelector).setProperty({"foo": "bar", "baz": "qux"}) instanceof window.NodeList).toBe(true);
         $(multipleFormSelector).forEach(function (element) {
-            assert.ok(!element.hasOwnProperty("foo"));
-            assert.ok(!element.hasOwnProperty("baz"));
+            expect(!element.hasOwnProperty("foo")).toBe(true);
+            expect(!element.hasOwnProperty("baz")).toBe(true);
         });
     });
 
-    Q.test("Get NodeList Property", function (assert) {
+    it("should get properties from the first `Element` in a `NodeList`", function () {
         $(multipleFormSelector)[0].title = "quux";
-        assert.equal($(multipleFormSelector).getProperty("title"), "quux");
-        assert.strictEqual($(multipleFormSelector).getProperty("foo"), undefined);
+        expect($(multipleFormSelector).getProperty("title")).toEqual("quux");
+        expect($(multipleFormSelector).getProperty("foo")).toBe(undefined);
     });
 
-    Q.test("NodeList Has Property", function (assert) {
-        assert.ok($(multipleFormSelector).hasProperty("title"));
-        assert.ok(!$(multipleFormSelector).hasProperty("foo"));
+    it("should detect if the first `Element` in a NodeList has a property", function () {
+        expect($(multipleFormSelector).hasProperty("title")).toBe(true);
+        expect($(multipleFormSelector).hasProperty("foo")).toBe(false);
     });
 
-    // Query Methods
-    Q.test("Single Query Select NodeList", function (assert) {
-        assert.equal($(multipleSelector).querySelector(nestedSelector), $(nestedSelector)[0]);
+    it("should return a single `Element` if `querySelector` is called on a `NodeList`", function () {
+        expect($(multipleSelector).querySelector(nestedSelector)).toBe($(nestedSelector)[0]);
     });
 
-    Q.test("Multiple Query Select Nodelist", function (assert) {
+    it("should return a `NodeList` if `querySelectorAll` is called on a `NodeList`", function () {
         var subResults = $(multipleSelector).querySelectorAll(nestedSelector),
             globResults = $(nestedSelector),
             i;
 
-        assert.equal(subResults.length, globResults.length);
+        expect(subResults.length).toEqual(globResults.length);
         for (i = 0; i < subResults.length; i += 1) {
-            assert.equal(subResults[i], globResults[i]);
+            expect(subResults[i]).toBe(globResults[i]);
         }
     });
-}(window.QUnit));
+});

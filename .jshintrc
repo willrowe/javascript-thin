@@ -1,0 +1,7 @@
+{
+    "browser": true,
+    "jasmine": true,
+    "node": true,
+    "undef": true,
+    "unused": true
+}
