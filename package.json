@@ -1,0 +1,32 @@
+{
+  "name": "thin",
+  "version": "1.3.0",
+  "description": "Thin is a small utility which extends the default behavior of the `Element` and `NodeList` JavaScript interfaces to make working with the DOM easier and require less code.",
+  "main": "thin.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jasmine-core": "^2.4.1",
+    "karma": "0.13.9",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-jasmine": "^0.3.7",
+    "karma-webpack": "^1.7.0",
+    "raw-loader": "^0.5.1",
+    "webpack": "^1.12.14"
+  },
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start karma.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/willrowe/javascript-thin.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/willrowe/javascript-thin/issues"
+  },
+  "homepage": "https://github.com/willrowe/javascript-thin#readme"
+}
