@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+v1.3.0 (2016.02.29)
+-------------------
+- Switched tests to use Karma and Jasmine instead of QUnit.
+
 v1.2.1 (2016.02.01)
 -------------------
 - The `NodeList` conversion functionality now accepts and combines multiple `Element` and `NodeList` parameters into one single `NodeList`. Previously only one parameter was accepted even though the underlying code could handle multiple.
